@@ -24,27 +24,27 @@ userID - Upala user ID
 groups - array of groups trusted by DApp that sends the request
 
 Returns user scores in trusted groups (one best for each group):
-{
-    scores:
-    [
-        {
-            groupID: "0x11111ed78501edb696adca9e41e78d8256b6",
-            baseScore: '20'  // decimal
-            merkleRoot: '0x11111e501...fa0434d7cf87d92345',
-            timestamp: '0xa35d',
-            claim: 
+    {
+        scores:
+        [
             {
-                index: 1,
-                score: '2', // decimal
-                proof: [
-                '0xbfeb956a3b70505...55c0a5fcab57124cb36f7b',
-                '0xd31de46890d4a77...73ec69b51efe4c9a5a72fa',
-                ],
-            }
-        },
-    ...
-    ]
-}
+                groupID: "0x11111ed78501edb696adca9e41e78d8256b6",
+                baseScore: '20'  // decimal
+                merkleRoot: '0x11111e501...fa0434d7cf87d92345',
+                timestamp: '0xa35d',
+                claim: 
+                {
+                    index: 1,
+                    score: '2', // decimal
+                    proof: [
+                    '0xbfeb956a3b70505...55c0a5fcab57124cb36f7b',
+                    '0xd31de46890d4a77...73ec69b51efe4c9a5a72fa',
+                    ],
+                }
+            },
+        ...
+        ]
+    }
 
 # Worker
 Keeps track of active roots and base scores (probably reads from graph node)
