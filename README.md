@@ -24,6 +24,7 @@ userID - Upala user ID
 groups - array of groups trusted by DApp that sends the request
 
 Returns user scores in trusted groups (one best for each group):
+
     {
         scores:
         [
