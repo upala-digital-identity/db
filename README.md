@@ -10,7 +10,7 @@ Records use same schema as in group-tools (todo link)
 ## Writing data
 Anyone can write data through a POST request. Checking the tree and the root on-chain provides sufficient secutity (except spam attack). 
 
-Writing workflow:
+### Workflow:
 - Checks if signature is correct. "Welcome to the Resistance!" must be signed by groupManagerAddress.
 Error: Wrong signature.
 
@@ -28,13 +28,29 @@ Error: Wrong data format.
 - Writes data
 
 
+## Housekeeping
+Run housekeeping through an authorized GET request.
+
+- Checks the graph protocol for deleted roots (Graph request "Get array of deleted roots since [latestDeletedRootTimestamp]")
+- Archives stale roots
+- Update latestDeletedRootTimestamp
+- Check for updated baseScores (Graph request "Get array of base score updates sinse "latestBaseScoreUpdateTimestamp]")
+- Update baseScores 
+- Update latestBaseScoreUpdateTimestamp
+
+
 ## Reading data
 Anyone can read data through a GET request.
 Request params:
 userID - Upala user ID
 groups - array of groups addresses trusted by the DApp that sends the request
 
-Returns user scores in trusted groups (one best for each group):
+### Workflow:
+
+- Run housekeeping if more than 1 minutes passed since the last one
+- Request db and return user scores in trusted groups (one best for each group)
+
+### Response:
 
     {
         scores:
@@ -58,8 +74,37 @@ Returns user scores in trusted groups (one best for each group):
         ]
     }
 
-# Worker
-Keeps track of active roots and base scores (probably reads from graph node).
+
+### Errors:
+- No such user
+- No scores found for the user
+
+# DB schema:
+
+    Groups {
+        groupAddress: bytes20,
+        baseScore: uint256,
+        Roots: {
+            hash: bytes32,
+            deleted: bool,
+            timestamp: unit256,
+            rootSpecificBaseScore: unit256,
+            claims: [
+                {
+                    index: uint256,
+                    userUpalaId: bytes20,
+                    score: uint256, // decimal??
+                    proof: [bytes32]
+                },
+            ]
+        }
+
+    Housekeeping {
+        lastHouseKeepingTimestamp: unit256,
+        latestDeletedRootTimestamp: unit256,
+        latestBaseScoreUpdateTimestamp: uint256,
+    }
+
 
 # Admin dashboard
 Inspect records, modify for tests purposes. Look for ready-made solutions. 
