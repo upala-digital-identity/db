@@ -31,11 +31,12 @@ Example message to DB:
 
 
 #### Workflow:
-- Checks if signature is correct. "Welcome to the Resistance!" must be signed by groupManagerAddress.
-Error: Wrong signature.
 
 - Checks if the sender is an acive group manager (Graph request "Get group manager for the group address").
 Error: Signer is not an active group manager. 
+
+- Checks if [signature] is correct. The whole message must be signed by groupManagerAddress.
+Error: Wrong signature.
 
 - Checks if the root is active onchain (Graph request "Get root timestamp by roothash")
 Error: No such root on-chain
@@ -68,6 +69,9 @@ Request params:
 userID - Upala user ID
 groups - array of groups addresses trusted by the DApp that sends the request
 
+Returns:
+Returns array of 10 best finalScores. Where finalScore = baseScore * score. 
+
 #### Workflow:
 
 - Run housekeeping if more than 1 minutes passed since the last one
@@ -81,16 +85,13 @@ groups - array of groups addresses trusted by the DApp that sends the request
             {
                 groupAddress: "0x11111ed78501edb696adca9e41e78d8256b6",
                 baseScore: '20'  // decimal??
-                merkleRoot: '0x11111e501...fa0434d7cf87d92345',
+                poolType: "SignedScoresPool",
+                scoreBundle: '0x11111e501...fa0434d7cf87d92345',
                 timestamp: '0xa35d',
                 claim: 
                 {
-                    index: 1,
                     score: '2', // decimal??
-                    proof: [
-                    '0xbfeb956a3b70505...55c0a5fcab57124cb36f7b',
-                    '0xd31de46890d4a77...73ec69b51efe4c9a5a72fa',
-                    ],
+                    proof: { signature: "0x447f8...fa0434d7cf87d92345" }
                 }
             },
         ...
@@ -107,18 +108,22 @@ groups - array of groups addresses trusted by the DApp that sends the request
     Groups {
         groupAddress: bytes20,
         baseScore: uint256,
-        Roots: {
-            hash: bytes32,
-            deleted: bool,
+        ScoreBundles: {
+            hash: bytes32,  // unique bundle id. tree root if Mekrle.
+            poolType: string,  // "merkle", "SignedScoresPool"
+            isDeleted: bool,
             timestamp: unit256,
-            rootSpecificBaseScore: unit256,
-            claims: [
+            bundleSpecificBaseScore: unit256,  //future, overrides baseScore
+            Claims: [
                 {
-                    index: uint256,
                     userUpalaId: bytes20,
-                    score: uint256, // decimal??
-                    proof: [bytes32]
-                },
+                    score: uint256, // or decimal??
+                    proof: {  //can be saved as text. Pool specific. 
+                        index: uint256,  // for Merkle pool
+                        merkleProof: [bytes32],  // for Merkle pool
+                        signature: bytes  // for SignedScoresPool
+                    }
+                }
             ]
         }
 
