@@ -80,8 +80,6 @@ Returns array of 10 best finalScores. Where finalScore = baseScore * score.
             {
                 groupAddress: "0x11111ed78501edb696adca9e41e78d8256b6",
                 baseScore: '20'  // decimal??
-                poolType: "SignedScoresPool",  //   uniqeness lib uses it to 
-                                                    build an appropriate proof
                 scoreBundle: '0x11111e501...fa0434d7cf87d92345',
                 timestamp: '0xa35d',
                 claim: 
@@ -106,7 +104,6 @@ Returns array of 10 best finalScores. Where finalScore = baseScore * score.
         baseScore: uint256,
         ScoreBundles: {
             hash: bytes32,  // unique bundle id. tree root if Mekrle.
-            poolType: string,  // "merkle", "SignedScoresPool"
             isDeleted: bool,
             timestamp: unit256,
             bundleSpecificBaseScore: unit256,  //future, overrides baseScore
