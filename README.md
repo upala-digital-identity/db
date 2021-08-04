@@ -8,14 +8,15 @@ Every network has it's own instance of db (e.g. https://rinkeby.db.upala.io).
 
 - Checks if the sender is an acive group manager (Graph request "Get group manager for the group address").
 Error: Signer is not an active group manager. 
-- Checks if the root is active onchain (Graph request "Get root timestamp by roothash")
+- Checks if the root is active onchain (Graph request "Get root timestamp by roothash"). Write root to db. 
 Error: No such root on-chain
 - Checks if [signature] is correct. The whole message must be signed by groupManagerAddress.
 Error: Wrong signature.
 - Converts scores to decimal? (unit256)??? todo
-- Writes data
-- Run housekeeping (will populate baseScore and check if root was deleted)
-- Return rootTimeStamp
+- Writes data (only increases scores)
+Warning: "You tried to decsrease scores use --force-decrease to update those"
+- Save transaction the whole transaction into log. 
+- Return result
 
 Example message to DB (proof field differs for different pool types):
 
@@ -23,7 +24,7 @@ Example message to DB (proof field differs for different pool types):
         groupAddress: "0x11111ed78501edb696adca9e41e78d8256b6",
         groupManagerAddress: "0x33321ed78501edb696adca9e41e78d8256b6",
         singature: "0x3asdgd78501edb696adca9e41e78dhdr5", 
-        scoreBundle: '0x11111e501...fa0434d7cf87d92345',
+        scoreBundleId: '0x11111e501...fa0434d7cf87d92345',
         claims: {
             [wallet0.address]: {
               score: 67,
@@ -41,18 +42,14 @@ Example message to DB (proof field differs for different pool types):
         },
     }
 
+Example return:
 
-
-
-## Housekeeping (GET)
-Run housekeeping through an authorized GET request.
-
-- Checks the graph protocol for deleted roots (Graph request "Get array of deleted roots since [latestDeletedRootTimestamp]")
-- Archives stale roots
-- Update latestDeletedRootTimestamp
-- Check for updated baseScores (Graph request "Get array of base score updates sinse "latestBaseScoreUpdateTimestamp]")
-- Update baseScores 
-- Update latestBaseScoreUpdateTimestamp
+    {
+        updatesCount: number of updates scores;
+        failedToDecrease: number of scores not updated due
+        warning: "You tried to decsrease scores use --force-decrease to update those"
+        error: ""
+    }
 
 
 ## Reading data (GET)
@@ -65,11 +62,10 @@ number of best scores - how many best scores should be retrieved
 start from - multipasport may request scores from posittion 10 to 20 when user presses "more" button.
 
 Returns:
-Returns array of 10 best finalScores. Where finalScore = baseScore * score. 
+Returns all individual scores.
 
 #### Workflow:
 
-- Run housekeeping if more than 1 minutes passed since the last one
 - Request db and return user scores in trusted groups (one best for each group)
 
 #### Response:
@@ -79,9 +75,9 @@ Returns array of 10 best finalScores. Where finalScore = baseScore * score.
         [
             {
                 groupAddress: "0x11111ed78501edb696adca9e41e78d8256b6",
-                baseScore: '20'  // decimal??
-                scoreBundle: '0x11111e501...fa0434d7cf87d92345',
-                timestamp: '0xa35d',
+                pool: '0x11111e501...fa0434d7cf87d92345',
+                timestamp: '0xa35d', // todo wtf??
+                transactionId: '0x42..abcd'   // db transaction id
                 claim: 
                 {
                     score: '2', // decimal??
@@ -119,12 +115,13 @@ Returns array of 10 best finalScores. Where finalScore = baseScore * score.
                 }
             ]
         }
-
-    Housekeeping {
-        lastHouseKeepingTimestamp: unit256,
-        latestDeletedRootTimestamp: unit256,
-        latestBaseScoreUpdateTimestamp: uint256,
+    Transactions {
+        id: some hash
+        data: string  // whole transaction json 
+        signature: 
     }
+
+
 
 
 # Admin dashboard
@@ -132,3 +129,25 @@ Inspect records, modify for tests purposes. Look for ready-made solutions.
 
 # Group managers dashboard
 Web UI to view scores. Search, filter functionality. 
+
+
+# Under deprication
+
+## Housekeeping (GET)
+**UPDT. Nothing is needed in this section anymore**
+Run housekeeping through an authorized GET request.
+
+- Checks the graph protocol for deleted roots (Graph request "Get array of deleted roots since [latestDeletedRootTimestamp]")
+- Archives stale roots
+- Update latestDeletedRootTimestamp
+- Check for updated baseScores (Graph request "Get array of base score updates sinse "latestBaseScoreUpdateTimestamp]")
+- Update baseScores 
+- Update latestBaseScoreUpdateTimestamp
+
+Schema:
+
+    Housekeeping {
+        lastHouseKeepingTimestamp: unit256,
+        latestDeletedRootTimestamp: unit256,
+        latestBaseScoreUpdateTimestamp: uint256,
+    }
