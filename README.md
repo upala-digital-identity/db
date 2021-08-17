@@ -64,7 +64,7 @@ Anyone can read data through a GET request.
 #### Request
 
     {
-        userID: bytes20 // Upala user ID
+        userID: [bytes20]   // user Upala ID and list of delegates
         pools: [bytes20]    // array of pool addresses trusted by the DApp
                             // todo does multipasport send all? possible pools?
     }
@@ -74,12 +74,15 @@ Anyone can read data through a GET request.
 - Return data
 
 #### Response
-Return user scores in **all** trusted pools (one best for each pool). E.g.:
+Return user scores in **all** trusted pools (one best for each pool). 
+
+E.g.:
 
     {
         scores:
         [
             {
+                userID: "0x23265231ed78501edb696adca9e41e78d8256b6",
                 poolAddress: "0x11111ed78501edb696adca9e41e78d8256b6",
                 timestamp: '0xa35d', // todo wtf??
                 transactionId: '0x42..abcd'   // db transaction id
